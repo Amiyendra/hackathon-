@@ -1,0 +1,81 @@
+{
+  "transcript_id": "call_20260919_001",
+  "call_metadata": {
+    "agent_id": "AGT_4092",
+    "customer_id": "CUST_88210",
+    "channel": "telephony",
+    "date": "2026-09-19"
+  },
+  "utterances": [
+    {
+      "utterance_id": "utt_001",
+      "speaker": "AGENT",
+      "start_time": 0.50,
+      "end_time": 4.20,
+      "text": "Thank you for calling PowerDirect support. My name is Sarah."
+    },
+    {
+      "utterance_id": "utt_002",
+      "speaker": "AGENT",
+      "start_time": 4.50,
+      "end_time": 8.95,
+      "text": "Please be advised that this call may be recorded for quality and compliance purposes."
+    },
+    {
+      "utterance_id": "utt_003",
+      "speaker": "CUSTOMER",
+      "start_time": 9.30,
+      "end_time": 12.10,
+      "text": "Hi Sarah, I'm calling to verify my current electricity plan and rates."
+    },
+    {
+      "utterance_id": "utt_004",
+      "speaker": "AGENT",
+      "start_time": 12.40,
+      "end_time": 15.80,
+      "text": "I can certainly assist with that. Could you please confirm your full name and billing address?"
+    },
+    {
+      "utterance_id": "utt_005",
+      "speaker": "CUSTOMER",
+      "start_time": 16.00,
+      "end_time": 19.40,
+      "text": "Yes, it is James Mitchell at 144 Ocean Avenue, Sydney."
+    },
+    {
+      "utterance_id": "utt_006",
+      "speaker": "AGENT",
+      "start_time": 20.00,
+      "end_time": 27.50,
+      "text": "Thank you James. Your current residential rate is 28.5 cents per kilowatt hour with a daily supply charge of 105 cents."
+    },
+    {
+      "utterance_id": "utt_007",
+      "speaker": "CUSTOMER",
+      "start_time": 28.10,
+      "end_time": 30.50,
+      "text": "Understood, that matches what I had noted down. Thank you!"
+    },
+    {
+      "utterance_id": "utt_008",
+      "speaker": "AGENT",
+      "start_time": 31.00,
+      "end_time": 33.80,
+      "text": "You are welcome. Is there anything else I can assist you with today?"
+    },
+    {
+      "utterance_id": "utt_009",
+      "speaker": "CUSTOMER",
+      "start_time": 34.00,
+      "end_time": 35.40,
+      "text": "No, that's all. Have a good day."
+    },
+    {
+      "utterance_id": "utt_010",
+      "speaker": "AGENT",
+      "start_time": 35.80,
+      "end_time": 37.60,
+      "text": "Thank you for calling PowerDirect. Goodbye."
+    }
+  ]
+}

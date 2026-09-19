@@ -1,0 +1,82 @@
+# Versioned Check Library: Broadband Verbatim / Script Compliance Rules
+# Retailer / Provider: TANGENT_BROADBAND
+# Source of truth for Verbatim & Script QA evaluations.
+# Criticality is strictly defined here and CANNOT be decided or altered by LLMs.
+
+version: "1.0.0"
+description: "Tangent Broadband Verbatim Script & Statutory Disclosure Rules (Phase 4)"
+
+checks:
+  # =========================================================================
+  # CATEGORY A: PASS TEST FIXTURES (Spoken in transcript)
+  # =========================================================================
+
+  - check_id: "CHK_VERB_BB_001_GREETING_BRAND"
+    retailer: "TANGENT_BROADBAND"
+    name: "Agent Brand Identification Greeting"
+    type: "VERBATIM"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Agent must state the official Tangent Broadband sales greeting (spoken in utt_001)."
+    criteria:
+      approved_text: "Thanks for calling Tangent Broadband sales."
+      speaker: "AGENT"
+    allow_semantic_variation: false
+
+  - check_id: "CHK_VERB_BB_002_STATUTORY_MIN_COST"
+    retailer: "TANGENT_BROADBAND"
+    name: "Statutory Minimum Total Cost Disclosure"
+    type: "VERBATIM"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Agent must state statutory minimum total cost disclosure (spoken in utt_015)."
+    criteria:
+      approved_text: "The minimum total cost over the first 6 months under this promotion is $317."
+      allowed_variations:
+        - "the minimum total cost over the first 6 months under this promotion is $317"
+        - "minimum total cost over the first 6 months under this promotion is $317"
+      speaker: "AGENT"
+    allow_semantic_variation: true
+
+  # =========================================================================
+  # CATEGORY B: FLAGGED UNSUPPORTED / SYNTHETIC TEST FIXTURE
+  # =========================================================================
+
+  - check_id: "CHK_VERB_BB_003_RECORDING_DISCLOSURE"
+    retailer: "TANGENT_BROADBAND"
+    name: "Call Recording Notice (UNSUPPORTED / SYNTHETIC CHECK)"
+    type: "VERBATIM"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "FLAGGED: Approved wording is unsupported by the supplied Tangent Broadband transcript. Borrowed from PowerDirect fixture as a synthetic negative test case, NOT an authentic Tangent Broadband QA failure."
+    criteria:
+      approved_text: "Please be advised that this call may be recorded for quality and compliance purposes."
+      speaker: "AGENT"
+      synthetic_status: "UNSUPPORTED_INVENTED_CHECK"
+      unsupported_rationale: "Wording does not exist in data/broadband_transcript.json and no official recording disclosure was specified for Tangent Broadband."
+    allow_semantic_variation: false
+
+  # =========================================================================
+  # CATEGORY C: AMBIGUOUS / QA REVIEW TEST FIXTURES
+  # =========================================================================
+
+  - check_id: "CHK_VERB_BB_004_COOLING_OFF_PERIOD"
+    retailer: "TANGENT_BROADBAND"
+    name: "Cooling-Off Rights Notice"
+    type: "VERBATIM"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Agent discloses statutory cooling off period (semantic variation allowed, omitted/low confidence -> AMBIGUOUS)."
+    criteria:
+      approved_text: "You are entitled to a standard 10 business day cooling-off period."
+      speaker: "AGENT"
+      min_confidence: 0.85
+    allow_semantic_variation: true

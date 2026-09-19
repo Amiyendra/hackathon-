@@ -1,0 +1,90 @@
+# Versioned QA Check Library
+# Source of truth for QA Gate compliance, factual, and behavioral checks.
+# Criticality is strictly defined here and CANNOT be decided or altered by LLMs.
+
+version: "2.1.0"
+description: "Production Energy Retailer QA Compliance and Verification Rules"
+
+checks:
+  # -------------------------------------------------------------------------
+  # VERBATIM CHECKS: Call Recording Disclosure (Versioned over time)
+  # -------------------------------------------------------------------------
+  - check_id: "CHK_CALL_RECORDING"
+    retailer: "POWERDIRECT"
+    name: "Call Recording Disclosure (2024 Historical)"
+    type: "VERBATIM"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2024-01-01"
+    effective_to: "2024-12-31"
+    description: "Agent must state 2024 legacy call recording disclosure."
+    criteria:
+      required_phrase: "This call is recorded for quality purposes."
+      exact_match: true
+    allow_semantic_variation: false
+
+  - check_id: "CHK_CALL_RECORDING"
+    retailer: "POWERDIRECT"
+    name: "Call Recording Disclosure (2025+ Modern)"
+    type: "VERBATIM"
+    version: "2.0.0"
+    critical: true
+    effective_from: "2025-01-01"
+    effective_to: null
+    description: "Agent must state updated statutory recording and privacy disclosure."
+    criteria:
+      required_phrase: "Please be advised that this call may be recorded for quality and compliance purposes."
+      exact_match: true
+    allow_semantic_variation: false
+
+  # -------------------------------------------------------------------------
+  # VERBATIM CHECK: Complaint Handling Right (Permits Semantic Variation)
+  # -------------------------------------------------------------------------
+  - check_id: "CHK_COMPLAINT_RIGHT"
+    retailer: "POWERDIRECT"
+    name: "External Dispute Resolution Disclosure"
+    type: "VERBATIM"
+    version: "1.1.0"
+    critical: false
+    effective_from: "2024-06-01"
+    effective_to: null
+    description: "Agent informs customer of their right to escalate to the Energy Ombudsman."
+    criteria:
+      concept: "Ombudsman escalation rights"
+      key_terms: ["Ombudsman", "external dispute", "complaints process"]
+    allow_semantic_variation: true
+
+  # -------------------------------------------------------------------------
+  # FACTUAL CHECK: Residential Tariff Quote Accuracy
+  # -------------------------------------------------------------------------
+  - check_id: "CHK_TARIFF_ACCURACY"
+    retailer: "POWERDIRECT"
+    name: "Residential Rate & Daily Charge Disclosure"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2025-01-01"
+    effective_to: null
+    description: "Agent must quote the approved rate (28.5 c/kWh) and daily supply charge (105 c/day)."
+    criteria:
+      target_field: "electricity_tariffs"
+      expected_rate_c_per_kwh: 28.5
+      expected_daily_supply_c: 105.0
+    allow_semantic_variation: false
+
+  # -------------------------------------------------------------------------
+  # BEHAVIOUR CHECK: Agent Professional Greeting (Always Non-Blocking)
+  # -------------------------------------------------------------------------
+  - check_id: "CHK_PROFESSIONAL_GREETING"
+    retailer: "POWERDIRECT"
+    name: "Professional Greeting and Self-Introduction"
+    type: "BEHAVIOUR"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2024-01-01"
+    effective_to: null
+    description: "Agent greeted customer with company name and agent first name."
+    criteria:
+      expected_speaker: "AGENT"
+      required_elements: ["company_greeting", "agent_name"]
+    allow_semantic_variation: true

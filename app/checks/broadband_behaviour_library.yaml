@@ -1,0 +1,100 @@
+# Versioned Check Library: Broadband Behaviour & Conduct Rules (Phase 5)
+# Retailer / Provider: TANGENT_BROADBAND
+# All checks configured here represent non-functional conversational conduct rules.
+#
+# IMPORTANT ARCHITECTURAL INVARIANT:
+# Behaviour checks are strictly NON-BLOCKING (critical: false).
+# They NEVER cause HOLD and NEVER block AUTO_SUBMIT.
+
+version: "1.0.0"
+description: "Tangent Broadband Behaviour & Conversational Dynamics Rules (Phase 5 Synthetic Specification)"
+
+checks:
+  # =========================================================================
+  # 1. DEAD AIR: Maximum Silence Gap Threshold
+  # =========================================================================
+  - check_id: "CHK_BEHAV_BB_001_DEAD_AIR"
+    retailer: "TANGENT_BROADBAND"
+    name: "Dead Air Threshold Check (10s Standard)"
+    type: "BEHAVIOUR"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Evaluates conversational silence gaps. Permitted threshold is 10 seconds."
+    criteria:
+      category: "DEAD_AIR"
+      dead_air_threshold_seconds: 10.0
+      synthetic_status: "SYNTHETIC_BEHAVIOUR_SPECIFICATION"
+      synthetic_rationale: "Standard telephony silence limit. Tangent Broadband transcript max gap is 0.8s -> PASS."
+
+  - check_id: "CHK_BEHAV_BB_002_DEAD_AIR_STRICT"
+    retailer: "TANGENT_BROADBAND"
+    name: "Strict Dead Air Check (0.3s Synthetic Limit)"
+    type: "BEHAVIOUR"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Synthetic test fixture for dead-air failure. Detects gaps exceeding 0.3s."
+    criteria:
+      category: "DEAD_AIR"
+      dead_air_threshold_seconds: 0.3
+      synthetic_status: "SYNTHETIC_BEHAVIOUR_SPECIFICATION"
+      synthetic_rationale: "Synthetic negative test case: gap between utt_001 and utt_002 is 0.30s -> FAIL (non-blocking)."
+
+  # =========================================================================
+  # 2. INTERRUPTIONS: Conversational Collisions / Overlaps
+  # =========================================================================
+  - check_id: "CHK_BEHAV_BB_003_INTERRUPTIONS"
+    retailer: "TANGENT_BROADBAND"
+    name: "Conversational Interruption Tolerance"
+    type: "BEHAVIOUR"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Evaluates speech collisions where speakers speak over each other."
+    criteria:
+      category: "INTERRUPTIONS"
+      max_allowed_interruptions: 0
+      synthetic_status: "SYNTHETIC_BEHAVIOUR_SPECIFICATION"
+      synthetic_rationale: "Clean turn-taking present in transcript; zero collisions detected -> PASS."
+
+  # =========================================================================
+  # 3. RAPPORT: Greeting, Active Listening, Courtesy
+  # =========================================================================
+  - check_id: "CHK_BEHAV_BB_004_RAPPORT"
+    retailer: "TANGENT_BROADBAND"
+    name: "Agent Professional Greeting & Courtesy"
+    type: "BEHAVIOUR"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Evaluates whether agent opens call politely and introduces themselves."
+    criteria:
+      category: "RAPPORT"
+      concept: "professional introduction and polite courteous opening"
+      min_confidence: 0.85
+      synthetic_status: "SYNTHETIC_BEHAVIOUR_SPECIFICATION"
+      synthetic_rationale: "Alex provides polite intro in utt_001 -> PASS."
+
+  # =========================================================================
+  # 4. OBJECTION HANDLING: Addressing Customer Hesitations / Cost Concerns
+  # =========================================================================
+  - check_id: "CHK_BEHAV_BB_005_OBJECTION_HANDLING"
+    retailer: "TANGENT_BROADBAND"
+    name: "Modem Cost & Delivery Objection Handling"
+    type: "BEHAVIOUR"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Evaluates agent responsiveness when customer asks about modem extra costs."
+    criteria:
+      category: "OBJECTION_HANDLING"
+      concept: "reassuring customer about zero modem fees and delivery timeframe"
+      min_confidence: 0.85
+      synthetic_status: "SYNTHETIC_BEHAVIOUR_SPECIFICATION"
+      synthetic_rationale: "Agent clearly states $0 free modem in utt_010 -> PASS."

@@ -1,0 +1,131 @@
+{
+  "transcript_id": "broadband_call_20260919_001",
+  "call_metadata": {
+    "provider": "TANGENT_BROADBAND",
+    "retailer": "TANGENT_BROADBAND",
+    "channel": "inbound_sales_telephony",
+    "call_date": "2026-09-19",
+    "redacted": true
+  },
+  "utterances": [
+    {
+      "utterance_id": "utt_001",
+      "speaker": "AGENT",
+      "start_time": 0.0,
+      "end_time": 4.5,
+      "text": "Thanks for calling Tangent Broadband sales. My name is Alex. How can I help you today?"
+    },
+    {
+      "utterance_id": "utt_002",
+      "speaker": "CUSTOMER",
+      "start_time": 4.8,
+      "end_time": 9.2,
+      "text": "Hi Alex, I'm looking to switch my home internet. My current provider is iPRIMUS and I want a cheaper plan."
+    },
+    {
+      "utterance_id": "utt_003",
+      "speaker": "AGENT",
+      "start_time": 9.5,
+      "end_time": 15.0,
+      "text": "I can certainly help you with that switch from iPRIMUS. May I please confirm your full name and service address?"
+    },
+    {
+      "utterance_id": "utt_004",
+      "speaker": "CUSTOMER",
+      "start_time": 15.3,
+      "end_time": 20.1,
+      "text": "Yes, my name is [CUSTOMER_NAME] and the address is [SERVICE_ADDRESS]."
+    },
+    {
+      "utterance_id": "utt_005",
+      "speaker": "AGENT",
+      "start_time": 20.5,
+      "end_time": 27.0,
+      "text": "Thank you [CUSTOMER_NAME]. Looking up your address, you have FTTP available at the premises."
+    },
+    {
+      "utterance_id": "utt_006",
+      "speaker": "AGENT",
+      "start_time": 27.5,
+      "end_time": 35.8,
+      "text": "Our Home Starter plan offers a typical download speed of 25 Mbps and an upload speed of 8.5 Mbps."
+    },
+    {
+      "utterance_id": "utt_007",
+      "speaker": "CUSTOMER",
+      "start_time": 36.2,
+      "end_time": 38.5,
+      "text": "That speed is fine for my needs. How much is the plan?"
+    },
+    {
+      "utterance_id": "utt_008",
+      "speaker": "AGENT",
+      "start_time": 39.0,
+      "end_time": 46.2,
+      "text": "The promotional price is $42.90 per month for the first 6 months, and then the regular price will be $72.90 per month thereafter."
+    },
+    {
+      "utterance_id": "utt_009",
+      "speaker": "CUSTOMER",
+      "start_time": 46.6,
+      "end_time": 49.0,
+      "text": "Does it come with a modem or do I have to pay extra for one?"
+    },
+    {
+      "utterance_id": "utt_010",
+      "speaker": "AGENT",
+      "start_time": 49.5,
+      "end_time": 56.5,
+      "text": "We include the Netcom CF40 Wi-Fi 6 modem. The modem cost is $0, completely free on this plan."
+    },
+    {
+      "utterance_id": "utt_011",
+      "speaker": "CUSTOMER",
+      "start_time": 57.0,
+      "end_time": 59.8,
+      "text": "That sounds great. When can the modem be delivered to me?"
+    },
+    {
+      "utterance_id": "utt_012",
+      "speaker": "AGENT",
+      "start_time": 60.2,
+      "end_time": 65.5,
+      "text": "Standard delivery takes between 3 to 5 business days from dispatch."
+    },
+    {
+      "utterance_id": "utt_013",
+      "speaker": "CUSTOMER",
+      "start_time": 66.0,
+      "end_time": 68.8,
+      "text": "And when would the new connection become active?"
+    },
+    {
+      "utterance_id": "utt_014",
+      "speaker": "AGENT",
+      "start_time": 69.2,
+      "end_time": 74.0,
+      "text": "We will schedule the connection as soon as possible once your transfer request clears."
+    },
+    {
+      "utterance_id": "utt_015",
+      "speaker": "AGENT",
+      "start_time": 74.5,
+      "end_time": 82.5,
+      "text": "Just to note the statutory disclosure, the minimum total cost over the first 6 months under this promotion is $317."
+    },
+    {
+      "utterance_id": "utt_016",
+      "speaker": "CUSTOMER",
+      "start_time": 83.0,
+      "end_time": 86.5,
+      "text": "Understood. Let's proceed with setting that up. My phone number is [PHONE_NUMBER]."
+    },
+    {
+      "utterance_id": "utt_017",
+      "speaker": "AGENT",
+      "start_time": 87.0,
+      "end_time": 92.0,
+      "text": "Perfect, thank you [CUSTOMER_NAME]. I have submitted your order and you will receive a confirmation email shortly."
+    }
+  ]
+}

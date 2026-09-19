@@ -1,0 +1,363 @@
+# Versioned Check Library: Broadband Sales QA Rules
+# Retailer / Provider: TANGENT_BROADBAND
+# All checks configured here represent the source of truth for factual verification.
+# Criticality is strictly configured in this file and CANNOT be altered by downstream LLMs.
+
+version: "1.0.0"
+description: "Tangent Broadband Factual Verification & Rate-Card Compliance Library"
+
+checks:
+  # =========================================================================
+  # CATEGORY A: PASS TEST FIXTURES (Explicitly supported by transcript)
+  # =========================================================================
+
+  - check_id: "CHK_FACT_BB_001_CURRENT_PROVIDER"
+    retailer: "TANGENT_BROADBAND"
+    name: "Transfer Origin Provider Verification"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify customer's stated existing provider matches CRM churn origin."
+    criteria:
+      field: "current_provider"
+      expected_source_reference: "data/broadband_ground_truth.json#current_provider"
+      comparison_method: "string_normalized"
+      confidence_requirements:
+        min_confidence: 0.90
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_002_CUSTOMER_NAME"
+    retailer: "TANGENT_BROADBAND"
+    name: "Customer Name Redaction Token Check"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify customer name placeholder is preserved without PII leakage."
+    criteria:
+      field: "customer_name"
+      expected_source_reference: "data/broadband_ground_truth.json#customer_name"
+      comparison_method: "placeholder_match"
+      confidence_requirements:
+        min_confidence: 0.95
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_003_SERVICE_ADDRESS"
+    retailer: "TANGENT_BROADBAND"
+    name: "Service Address Redaction Token Check"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify service address placeholder is preserved without PII leakage."
+    criteria:
+      field: "service_address"
+      expected_source_reference: "data/broadband_ground_truth.json#service_address"
+      comparison_method: "placeholder_match"
+      confidence_requirements:
+        min_confidence: 0.95
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_004_DOWNLOAD_SPEED"
+    retailer: "TANGENT_BROADBAND"
+    name: "Plan Download Speed Disclosure"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify agent accurately quoted 25 Mbps typical download speed."
+    criteria:
+      field: "download_speed_mbps"
+      expected_source_reference: "data/broadband_ground_truth.json#download_speed_mbps"
+      comparison_method: "numeric_exact"
+      confidence_requirements:
+        min_confidence: 0.95
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_005_UPLOAD_SPEED"
+    retailer: "TANGENT_BROADBAND"
+    name: "Plan Upload Speed Disclosure"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify agent accurately quoted 8.5 Mbps upload speed."
+    criteria:
+      field: "upload_speed_mbps"
+      expected_source_reference: "data/broadband_ground_truth.json#upload_speed_mbps"
+      comparison_method: "numeric_exact"
+      confidence_requirements:
+        min_confidence: 0.95
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_006_PROMOTIONAL_PRICE"
+    retailer: "TANGENT_BROADBAND"
+    name: "Promotional Monthly Recurring Charge"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify promotional rate of $42.90 per month is accurately stated."
+    criteria:
+      field: "promotional_price_aud"
+      expected_source_reference: "data/broadband_ground_truth.json#promotional_price_aud"
+      comparison_method: "currency_exact"
+      confidence_requirements:
+        min_confidence: 0.95
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_007_PROMOTIONAL_PERIOD"
+    retailer: "TANGENT_BROADBAND"
+    name: "Promotional Discount Duration"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify agent states promotional rate applies for first 6 months."
+    criteria:
+      field: "promotional_period_months"
+      expected_source_reference: "data/broadband_ground_truth.json#promotional_period_months"
+      comparison_method: "numeric_exact"
+      confidence_requirements:
+        min_confidence: 0.95
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_008_REGULAR_PRICE"
+    retailer: "TANGENT_BROADBAND"
+    name: "Standard Monthly Price Post-Promotion"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify ongoing regular monthly charge of $72.90 is accurately stated."
+    criteria:
+      field: "regular_price_aud"
+      expected_source_reference: "data/broadband_ground_truth.json#regular_price_aud"
+      comparison_method: "currency_exact"
+      confidence_requirements:
+        min_confidence: 0.95
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_009_MODEM_MODEL"
+    retailer: "TANGENT_BROADBAND"
+    name: "Included Hardware Modem Model"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify bundled router model is quoted as Netcom CF40 Wi-Fi 6."
+    criteria:
+      field: "modem_model"
+      expected_source_reference: "data/broadband_ground_truth.json#modem_model"
+      comparison_method: "string_normalized"
+      confidence_requirements:
+        min_confidence: 0.90
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_010_MODEM_COST"
+    retailer: "TANGENT_BROADBAND"
+    name: "Modem Upfront Purchase Price"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify modem purchase fee is accurately stated as $0 / free."
+    criteria:
+      field: "modem_hardware_cost_aud"
+      expected_source_reference: "data/broadband_ground_truth.json#modem_hardware_cost_aud"
+      comparison_method: "currency_exact"
+      confidence_requirements:
+        min_confidence: 0.95
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_011_DELIVERY_TIMELINE"
+    retailer: "TANGENT_BROADBAND"
+    name: "Modem Dispatch Delivery SLA"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify delivery timeline quoted as 3 to 5 business days."
+    criteria:
+      field: "modem_delivery_timeline"
+      expected_source_reference: "data/broadband_ground_truth.json#modem_delivery_timeline"
+      comparison_method: "range_text_match"
+      confidence_requirements:
+        min_confidence: 0.90
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_012_CONNECTION_TIMING"
+    retailer: "TANGENT_BROADBAND"
+    name: "Service Activation SLA"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify connection timing quoted as as soon as possible."
+    criteria:
+      field: "connection_timing"
+      expected_source_reference: "data/broadband_ground_truth.json#connection_timing"
+      comparison_method: "semantic_or_phrase"
+      confidence_requirements:
+        min_confidence: 0.85
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  - check_id: "CHK_FACT_BB_013_MINIMUM_COST"
+    retailer: "TANGENT_BROADBAND"
+    name: "Statutory Minimum Total Cost Disclosure"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify statutory minimum total cost of $317 is explicitly disclosed."
+    criteria:
+      field: "minimum_total_cost_aud"
+      expected_source_reference: "data/broadband_ground_truth.json#minimum_total_cost_aud"
+      comparison_method: "currency_exact"
+      confidence_requirements:
+        min_confidence: 0.95
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  # =========================================================================
+  # CATEGORY B: FAIL TEST FIXTURES (Deliberate synthetic rate-card mismatches)
+  # =========================================================================
+
+  - check_id: "CHK_FACT_BB_014_DELIVERY_FEE"
+    retailer: "TANGENT_BROADBAND"
+    name: "Hardware Delivery and Handling Charge"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "RATE-CARD MISMATCH TEST: Checks whether mandatory $15 postage fee was disclosed."
+    criteria:
+      field: "modem_delivery_fee_aud"
+      expected_source_reference: "data/broadband_ground_truth.json#modem_delivery_fee_aud"
+      comparison_method: "currency_exact"
+      confidence_requirements:
+        min_confidence: 0.95
+        allow_unclear: false
+      test_case_category: "FAIL"
+      synthetic_basis: "synthetic_test_variation"
+
+  - check_id: "CHK_FACT_BB_015_CONTRACT_TERM"
+    retailer: "TANGENT_BROADBAND"
+    name: "Contract Commitment Term"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "RATE-CARD MISMATCH TEST: Checks whether 12-month contract commitment was disclosed."
+    criteria:
+      field: "plan_contract_term_months"
+      expected_source_reference: "data/broadband_ground_truth.json#plan_contract_term_months"
+      comparison_method: "numeric_exact"
+      confidence_requirements:
+        min_confidence: 0.90
+        allow_unclear: false
+      test_case_category: "FAIL"
+      synthetic_basis: "synthetic_test_variation"
+
+  - check_id: "CHK_FACT_BB_016_TECHNOLOGY_TYPE"
+    retailer: "TANGENT_BROADBAND"
+    name: "NBN Access Technology Disclosure (FTTP)"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: true
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "Verify agent accurately disclosed premises access technology as FTTP."
+    criteria:
+      field: "nbn_technology_type"
+      expected_source_reference: "data/broadband_ground_truth.json#nbn_technology_type"
+      comparison_method: "string_exact"
+      confidence_requirements:
+        min_confidence: 0.95
+        allow_unclear: false
+      test_case_category: "PASS"
+      synthetic_basis: "explicitly_stated_in_transcript"
+
+  # =========================================================================
+  # CATEGORY C: AMBIGUOUS/MISSING TEST FIXTURES (Unclear or unmentioned)
+  # =========================================================================
+
+  - check_id: "CHK_FACT_BB_017_BATTERY_BACKUP"
+    retailer: "TANGENT_BROADBAND"
+    name: "Battery Backup Availability Disclosure"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "MISSING CLAIM TEST: Checks non-inclusion of battery backup unit (omitted in call)."
+    criteria:
+      field: "battery_backup_unit_included"
+      expected_source_reference: "data/broadband_ground_truth.json#battery_backup_unit_included"
+      comparison_method: "boolean_exact"
+      confidence_requirements:
+        min_confidence: 0.90
+        allow_unclear: true
+      test_case_category: "AMBIGUOUS"
+      synthetic_basis: "synthetic_test_variation"
+
+  - check_id: "CHK_FACT_BB_018_STATIC_IP"
+    retailer: "TANGENT_BROADBAND"
+    name: "Static IP Address Option Disclosure"
+    type: "FACTUAL"
+    version: "1.0.0"
+    critical: false
+    effective_from: "2026-01-01"
+    effective_to: null
+    description: "MISSING CLAIM TEST: Checks whether dynamic vs static IP addressing was disclosed (omitted in call)."
+    criteria:
+      field: "static_ip_address_included"
+      expected_source_reference: "data/broadband_ground_truth.json#static_ip_address_included"
+      comparison_method: "boolean_exact"
+      confidence_requirements:
+        min_confidence: 0.85
+        allow_unclear: true
+      test_case_category: "AMBIGUOUS"
+      synthetic_basis: "synthetic_test_variation"
+
