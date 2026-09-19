@@ -14,7 +14,7 @@ from app.factual.exceptions import (
     InvalidEvidenceError,
     MissingExpectedValueError,
 )
-from app.factual.extractor import ClaimExtractor, scan_redaction_placeholder
+from app.factual.extractor import ClaimExtractor
 from app.factual.llm import (
     BaseLLMClient,
     MockLLMClient,
@@ -28,7 +28,6 @@ __all__ = [
     "ExtractedClaim",
     "FactualEngine",
     "ClaimExtractor",
-    "scan_redaction_placeholder",
     "DeterministicComparator",
     "BaseLLMClient",
     "MockLLMClient",

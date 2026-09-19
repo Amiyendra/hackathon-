@@ -595,33 +595,6 @@ def test_get_llm_client_providers(monkeypatch):
 # Regression IDs: CHK_FACT_BB_002_CUSTOMER_NAME, CHK_FACT_BB_003_SERVICE_ADDRESS
 # ---------------------------------------------------------------------------
 
-from app.factual.extractor import scan_redaction_placeholder
-
-
-# R-1. scan_redaction_placeholder correctly detects [CUSTOMER_NAME] as first match
-def test_scan_redaction_placeholder_customer_name():
-    text = "Yes, my name is [CUSTOMER_NAME] and the address is [SERVICE_ADDRESS]."
-    result = scan_redaction_placeholder(text)
-    assert result == "[CUSTOMER_NAME]"
-
-
-# R-2. scan_redaction_placeholder correctly detects [SERVICE_ADDRESS] when first
-def test_scan_redaction_placeholder_service_address_first():
-    text = "The service address is [SERVICE_ADDRESS]."
-    result = scan_redaction_placeholder(text)
-    assert result == "[SERVICE_ADDRESS]"
-
-
-# R-3. scan_redaction_placeholder returns None for plain text with no placeholder
-def test_scan_redaction_placeholder_no_match():
-    text = "The rate is 28.5 cents per kilowatt hour."
-    assert scan_redaction_placeholder(text) is None
-
-
-# R-4. scan_redaction_placeholder returns None for lowercase / non-canonical form
-def test_scan_redaction_placeholder_lowercase_not_matched():
-    text = "My name is [customer_name] today."
-    assert scan_redaction_placeholder(text) is None
 
 
 # R-5. ClaimExtractor overrides LLM hallucination "Customer Name" -> "[CUSTOMER_NAME]"
