@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Union
 from pydantic import ValidationError
 
 from app.config import config
-from app.models import CanonicalTranscript, Utterance
+from app.models import CanonicalTranscript, Utterance, WordTiming
 
 
 class TranscriptNormalizationError(ValueError):
@@ -145,6 +145,35 @@ class TranscriptNormalizer:
                 f"Utterance {utterance_id} (index {index}) end_time ({end_time}) cannot be earlier than start_time ({start_time})."
             )
 
+        # 5. Optional word-level timestamps
+        words: Optional[List[WordTiming]] = None
+        raw_words = item.get("words")
+        if raw_words is not None:
+            if not isinstance(raw_words, list):
+                raise TranscriptNormalizationError(f"Utterance {utterance_id} 'words' field must be a list.")
+            normalized_words: List[WordTiming] = []
+            for w in raw_words:
+                if not isinstance(w, dict):
+                    continue
+                w_word = str(w.get("word", "")).strip()
+                w_start = w.get("start_time") if w.get("start_time") is not None else w.get("start")
+                w_end = w.get("end_time") if w.get("end_time") is not None else w.get("end")
+                w_conf = w.get("confidence")
+                if w_start is not None and w_end is not None:
+                    try:
+                        normalized_words.append(
+                            WordTiming(
+                                word=w_word,
+                                start_time=float(w_start),
+                                end_time=float(w_end),
+                                confidence=float(w_conf) if w_conf is not None else None,
+                            )
+                        )
+                    except Exception:
+                        pass
+            if normalized_words:
+                words = normalized_words
+
         try:
             return Utterance(
                 utterance_id=utterance_id,
@@ -152,6 +181,7 @@ class TranscriptNormalizer:
                 start_time=start_time,
                 end_time=end_time,
                 text=text,
+                words=words,
             )
         except ValidationError as e:
             raise TranscriptNormalizationError(

@@ -42,6 +42,14 @@ class AppConfig(BaseModel):
     default_id_prefix: str = "utt_"
     default_id_padding: int = 3
     data_dir: Path = Path(__file__).resolve().parent.parent / "data"
+    deepgram_api_key: Optional[str] = None
 
 
-config = AppConfig()
+def get_deepgram_api_key() -> Optional[str]:
+    """Retrieve Deepgram API key strictly from environment variable or configuration."""
+    return os.environ.get("DEEPGRAM_API_KEY") or config.deepgram_api_key
+
+
+config = AppConfig(
+    deepgram_api_key=os.environ.get("DEEPGRAM_API_KEY")
+)

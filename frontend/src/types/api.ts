@@ -72,6 +72,29 @@ export interface IngestionResponse {
   transcript?: TranscriptPayload | null;
 }
 
+export interface AudioIngestionResponse {
+  ingestion_id: string;
+  status: string;
+  source_type: string;
+  utterance_count: number;
+  duration_seconds: number;
+  lead_id?: string | null;
+  retailer?: string | null;
+  call_date?: string | null;
+  transcript?: TranscriptPayload | null;
+}
+
+export type QAProcessState =
+  | 'IDLE'
+  | 'UPLOADING'
+  | 'TRANSCRIBING'
+  | 'INDEXING'
+  | 'VALIDATING'
+  | 'READY'
+  | 'EVALUATING'
+  | 'SUCCESS'
+  | 'ERROR';
+
 export interface QARunRequest {
   scenario?: string;
   ingestion_id?: string;

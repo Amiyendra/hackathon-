@@ -13,6 +13,7 @@ from fastapi import APIRouter, Header, HTTPException, Request, status
 
 from app.api.ingestion_store import ingestion_store
 from app.api.models import (
+    AudioIngestionResponse,
     HealthResponse,
     IngestionResponse,
     QARunRequest,
@@ -22,6 +23,13 @@ from app.gate import DeterministicGate
 from app.gate.models import GateResult
 from app.ingestion.normalizer import TranscriptNormalizationError, TranscriptNormalizer
 from app.models import CanonicalTranscript
+from app.stt import (
+    BaseSTTClient,
+    DeepgramAdapter,
+    DeepgramAPIError,
+    DeepgramAuthError,
+    DeepgramSTTClient,
+)
 from app.pipeline.orchestrator import (
     QAPipeline,
     load_default_broadband_ground_truth,
@@ -36,6 +44,19 @@ DEFAULT_TRANSCRIPT_PATH = PROJECT_ROOT / "data" / "broadband_transcript.json"
 
 # Max allowed transcript upload size (5 MB)
 MAX_TRANSCRIPT_SIZE_BYTES = 5 * 1024 * 1024
+
+# Max allowed audio upload size (50 MB)
+MAX_AUDIO_SIZE_BYTES = 50 * 1024 * 1024
+
+# STT Client resolver (allows test injection / mocking)
+_stt_client_override: Optional[BaseSTTClient] = None
+
+
+def get_stt_client() -> BaseSTTClient:
+    """Resolve STT client instance (supports test mocking and dependency injection)."""
+    if _stt_client_override is not None:
+        return _stt_client_override
+    return DeepgramSTTClient()
 
 # Pre-cached library and ground truth for efficiency
 _DEFAULT_LIBRARY = load_default_broadband_library(PROJECT_ROOT)
@@ -344,6 +365,170 @@ async def ingest_transcript(request: Request) -> IngestionResponse:
         call_date=record.call_date,
         utterance_count=len(canonical.utterances),
         status="READY_FOR_QA",
+        transcript=canonical,
+    )
+
+
+@router.post(
+    "/api/v1/ingest/audio",
+    response_model=AudioIngestionResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Ingestion"],
+)
+async def ingest_audio(request: Request) -> AudioIngestionResponse:
+    """
+    Ingest, transcribe, and canonically normalize a prerecorded audio file (MP3/WAV).
+
+    Accepts:
+    multipart/form-data:
+    - file: MP3 or WAV audio file
+    - retailer: Optional retailer code (e.g. TANGENT_BROADBAND)
+    - call_date: Optional call date (YYYY-MM-DD)
+    - speaker_0_role: Role assigned to Deepgram speaker 0 (default: AGENT)
+    - speaker_1_role: Role assigned to Deepgram speaker 1 (default: CUSTOMER)
+    - lead_id: Optional lead identifier
+
+    Validates:
+    - Content-Type is multipart/form-data
+    - 'file' field exists and is not empty
+    - Audio format is strictly MP3 or WAV
+    - File size is <= 50MB
+
+    Flow:
+    audio → Deepgram transcription → canonical transcript → existing ingestion_store → ingestion_id
+
+    Returns:
+    AudioIngestionResponse with ingestion_id compatible with /api/v1/qa/run.
+    """
+    content_type = request.headers.get("content-type", "").lower()
+    if "multipart/form-data" not in content_type:
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Unsupported content type. Expected multipart/form-data.",
+        )
+
+    try:
+        form = await request.form()
+    except Exception as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to parse multipart form data: {err}",
+        )
+
+    file_field = form.get("file")
+    if not file_field or not hasattr(file_field, "read"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing 'file' field in multipart/form-data upload.",
+        )
+
+    filename = getattr(file_field, "filename", "") or ""
+    filename_lower = filename.lower().strip()
+    if not (filename_lower.endswith(".mp3") or filename_lower.endswith(".wav")):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid audio format for '{filename}'. Only MP3 and WAV files are supported.",
+        )
+
+    content = await file_field.read()
+    if len(content) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Uploaded audio file is empty.",
+        )
+
+    if len(content) > MAX_AUDIO_SIZE_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"Uploaded audio file exceeds maximum allowed size of {MAX_AUDIO_SIZE_BYTES // (1024 * 1024)}MB.",
+        )
+
+    # Determine audio MIME type
+    if filename_lower.endswith(".mp3"):
+        mime_type = "audio/mpeg"
+    else:
+        mime_type = "audio/wav"
+
+    # Speaker role mappings (defaults: speaker_0 = AGENT, speaker_1 = CUSTOMER)
+    spk0_raw = form.get("speaker_0_role")
+    spk1_raw = form.get("speaker_1_role")
+    spk0_role = str(spk0_raw).strip().upper() if spk0_raw and str(spk0_raw).strip() else "AGENT"
+    spk1_role = str(spk1_raw).strip().upper() if spk1_raw and str(spk1_raw).strip() else "CUSTOMER"
+
+    # Retailer, call date, and lead ID overrides
+    retailer_form = form.get("retailer")
+    call_date_form = form.get("call_date")
+    lead_id_form = form.get("lead_id")
+
+    resolved_retailer = str(retailer_form).strip().upper() if retailer_form and str(retailer_form).strip() else None
+    resolved_call_date = str(call_date_form).strip() if call_date_form and str(call_date_form).strip() else None
+    resolved_lead_id = str(lead_id_form).strip() if lead_id_form and str(lead_id_form).strip() else None
+
+    # Step 1: Transcribe via Deepgram STT
+    stt_client = get_stt_client()
+    try:
+        dg_response = stt_client.transcribe(audio_bytes=content, mime_type=mime_type)
+    except DeepgramAuthError as err:
+        # Crucial security guarantee: never expose raw API keys in responses
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Deepgram STT service unavailable — API key not configured or authentication failed.",
+        )
+    except DeepgramAPIError as err:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Deepgram STT transcription service error: {err}",
+        )
+    except Exception as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Deepgram audio transcription failed: {err}",
+        )
+
+    # Step 2: Convert to canonical transcript
+    adapter = DeepgramAdapter()
+    try:
+        canonical = adapter.to_canonical_transcript(
+            deepgram_response=dg_response,
+            transcript_id=resolved_lead_id,
+            speaker_0_role=spk0_role,
+            speaker_1_role=spk1_role,
+        )
+    except Exception as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to normalize Deepgram transcription into canonical transcript: {err}",
+        )
+
+    # Step 3: Save into thread-safe session store
+    record = ingestion_store.save(
+        canonical_transcript=canonical,
+        raw_data=dg_response,
+        lead_id=resolved_lead_id or canonical.transcript_id,
+        retailer=resolved_retailer,
+        call_date=resolved_call_date,
+    )
+
+    # Calculate duration
+    duration = canonical.duration
+    metadata = dg_response.get("metadata", {}) if isinstance(dg_response, dict) else {}
+    if isinstance(metadata, dict) and "duration" in metadata:
+        try:
+            meta_dur = float(metadata["duration"])
+            if meta_dur > duration:
+                duration = meta_dur
+        except (ValueError, TypeError):
+            pass
+
+    return AudioIngestionResponse(
+        ingestion_id=record.ingestion_id,
+        status="ready",
+        source_type="audio",
+        utterance_count=len(canonical.utterances),
+        duration_seconds=round(duration, 2),
+        lead_id=record.lead_id,
+        retailer=record.retailer,
+        call_date=record.call_date,
         transcript=canonical,
     )
 

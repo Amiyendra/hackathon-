@@ -18,6 +18,7 @@ import {
   CheckResult,
   TranscriptPayload,
   IngestionResponse,
+  AudioIngestionResponse,
 } from '@/types/api';
 import { AlertCircle, RefreshCw, CheckSquare } from 'lucide-react';
 
@@ -32,7 +33,7 @@ export default function QAControlCenterPage() {
   const [processState, setProcessState] = useState<QAProcessState>('IDLE');
   const [stateMessage, setStateMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [ingestion, setIngestion] = useState<IngestionResponse | null>(null);
+  const [ingestion, setIngestion] = useState<IngestionResponse | AudioIngestionResponse | null>(null);
 
   // Result state (dynamically populated exclusively from API)
   const [gateResult, setGateResult] = useState<GateResult | null>(null);
@@ -169,6 +170,84 @@ export default function QAControlCenterPage() {
     }
   };
 
+  // 2b. Audio Upload Workflow: Audio File -> Deepgram STT -> Ingestion -> Evaluate -> Render
+  const handleStartAudioReview = async (
+    file: File,
+    metadata: {
+      lead_id?: string;
+      retailer?: string;
+      call_date?: string;
+      speaker_0_role?: string;
+      speaker_1_role?: string;
+    }
+  ) => {
+    setErrorMessage(null);
+    setProcessState('UPLOADING');
+    setStateMessage('Uploading audio recording to QA Control Center...');
+
+    try {
+      // Step A: Transcribe via Deepgram
+      setProcessState('TRANSCRIBING');
+      setStateMessage('Transcribing speech via Deepgram STT (prerecorded audio)...');
+
+      const audioRes = await api.uploadAudio(file, metadata);
+      setIngestion(audioRes);
+
+      // Step B: Indexing & Diarization
+      setProcessState('INDEXING');
+      setStateMessage(`✓ Speech transcribed (${audioRes.utterance_count} utterances) · Identifying speakers & indexing transcript...`);
+      await new Promise((r) => setTimeout(r, 450));
+
+      // Step C: Ready for QA
+      setProcessState('READY');
+      setStateMessage('✓ Speakers identified · Transcript indexed & ready for QA evaluation');
+      await new Promise((r) => setTimeout(r, 350));
+
+      // Step D: Evaluate through existing QA Pipeline
+      setProcessState('EVALUATING');
+      setStateMessage('Evaluating compliance checks against check library & applying deterministic gate...');
+
+      const qaResult = await api.runQA({
+        ingestion_id: audioRes.ingestion_id,
+        retailer: metadata.retailer || audioRes.retailer || undefined,
+        call_date: metadata.call_date || audioRes.call_date || undefined,
+        lead_id: metadata.lead_id || audioRes.lead_id || undefined,
+      });
+
+      // Step E: Retrieve canonical transcript for this session
+      const transcriptData = await api.getTranscript(audioRes.ingestion_id);
+      setTranscript(transcriptData);
+      setGateResult(qaResult);
+      setProcessState('SUCCESS');
+      setStateMessage('✓ QA evaluation complete — live deterministic decision rendered');
+
+      const firstIssue = qaResult.check_results.find((c) => c.status !== 'PASS');
+      if (firstIssue) {
+        setSelectedCheck(firstIssue);
+        if (firstIssue.evidence) {
+          setActiveUtteranceId(firstIssue.evidence.utterance_id);
+        }
+      } else if (qaResult.check_results.length > 0) {
+        setSelectedCheck(qaResult.check_results[0]);
+      }
+    } catch (err: unknown) {
+      setProcessState('ERROR');
+      let detail = 'An unexpected error occurred during audio transcription or evaluation.';
+      if (err instanceof ApiError) {
+        detail = err.detail || err.message;
+      } else if (err instanceof Error) {
+        detail = err.message;
+      }
+
+      if (detail.includes('Anthropic') || detail.includes('credentials')) {
+        detail = 'QA evaluation unavailable — configure Anthropic API credentials.';
+      }
+
+      setErrorMessage(detail);
+      setStateMessage('');
+    }
+  };
+
   // 3. Developer / Demo Scenario Rehearsal
   const handleRunScenario = async (scenarioId: string) => {
     setScenarioLoading(true);
@@ -264,6 +343,7 @@ export default function QAControlCenterPage() {
         {/* PRIMARY WORKFLOW: Real Transcript Ingestion & QA Review Trigger */}
         <UploadTranscriptCard
           onStartReview={handleStartReview}
+          onStartAudioReview={handleStartAudioReview}
           processState={processState}
           stateMessage={stateMessage}
           errorMessage={errorMessage}

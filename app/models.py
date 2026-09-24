@@ -12,6 +12,26 @@ from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 
 
+class WordTiming(BaseModel):
+    """
+    Representation of a single timestamped word within an utterance.
+    """
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    word: str = Field(..., description="Verbatim word string")
+    start_time: float = Field(..., ge=0.0, description="Start offset in seconds")
+    end_time: float = Field(..., ge=0.0, description="End offset in seconds")
+    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Confidence score")
+
+    @model_validator(mode="after")
+    def validate_word_time_range(self) -> "WordTiming":
+        if self.end_time < self.start_time:
+            raise ValueError(
+                f"end_time ({self.end_time}) cannot be earlier than start_time ({self.start_time})"
+            )
+        return self
+
+
 class Utterance(BaseModel):
     """
     Canonical representation of a single dialogue utterance in a transcript.
@@ -22,6 +42,7 @@ class Utterance(BaseModel):
         start_time: Start timestamp in seconds from audio onset (>= 0.0).
         end_time: End timestamp in seconds from audio onset (>= start_time).
         text: Raw verbatim text of the utterance. Treated strictly as passive data.
+        words: Optional word-level timestamp breakdown.
     """
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -30,6 +51,7 @@ class Utterance(BaseModel):
     start_time: float = Field(..., ge=0.0, description="Start offset in seconds")
     end_time: float = Field(..., ge=0.0, description="End offset in seconds")
     text: str = Field(..., description="Verbatim utterance text (untrusted passive data)")
+    words: Optional[List[WordTiming]] = Field(default=None, description="Optional word-level timestamps")
 
     @model_validator(mode="after")
     def validate_time_range(self) -> "Utterance":

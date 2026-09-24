@@ -23,6 +23,19 @@ class IngestionResponse(BaseModel):
     transcript: Optional[CanonicalTranscript] = Field(default=None, description="Normalized canonical transcript")
 
 
+class AudioIngestionResponse(BaseModel):
+    """Response payload for audio ingestion and transcription."""
+    ingestion_id: str = Field(..., description="Unique ID for the ingested session")
+    status: str = Field(default="ready", description="Ingestion readiness status")
+    source_type: str = Field(default="audio", description="Source type of ingestion")
+    utterance_count: int = Field(..., description="Number of canonical utterances transcribed")
+    duration_seconds: float = Field(..., description="Total audio duration in seconds")
+    lead_id: Optional[str] = Field(default=None, description="Lead ID extracted or provided")
+    retailer: Optional[str] = Field(default=None, description="Retailer extracted or provided")
+    call_date: Optional[str] = Field(default=None, description="Call date in YYYY-MM-DD format")
+    transcript: Optional[CanonicalTranscript] = Field(default=None, description="Normalized canonical transcript")
+
+
 class QARunRequest(BaseModel):
     """Request payload for executing the QA Gate evaluation pipeline."""
     model_config = ConfigDict(extra="forbid")
@@ -84,6 +97,7 @@ class ScenarioInfo(BaseModel):
 
 __all__ = [
     "IngestionResponse",
+    "AudioIngestionResponse",
     "QARunRequest",
     "HealthResponse",
     "ScenarioInfo",
